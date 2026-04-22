@@ -35,9 +35,10 @@ export default async function MemberPage({ params }: Props) {
   const facts = (member.personalFacts ?? []).filter(Boolean);
 
   return (
-    <main className="flex flex-col min-h-[100dvh] bg-[color:var(--ink)]">
+    <main className="flex flex-col min-h-[100dvh] bg-[#151f27]">
+      {/* Photo: 393×375 aspect from Figma */}
       <section className="relative">
-        <div className="relative aspect-[309/295] w-full bg-[#e8ebee]">
+        <div className="relative w-full bg-[#e8ebee]" style={{ aspectRatio: "393 / 375" }}>
           {member.photo ? (
             <Image
               src={member.photo}
@@ -54,85 +55,76 @@ export default async function MemberPage({ params }: Props) {
             </div>
           )}
 
-          <div className="absolute right-4 top-4">
-            <IdeoLogo className="text-[color:var(--ink)]" height={24} />
+          <div className="absolute right-[20px] top-[25px]">
+            <IdeoLogo className="text-[#151f27]" height={23} />
           </div>
         </div>
 
-        <div className="bg-[color:var(--lime)] text-[#141f27] px-[20px] py-[12px]">
+        {/* Name bar: height 92, bg #d9ff00, px-20 py-12 */}
+        <div className="bg-[#d9ff00] px-[20px] py-[12px]">
           <div className="flex flex-col gap-[12px] py-[12px]">
-            <h1 className="text-[28px] leading-[normal] font-normal tracking-tight">
+            <h1 className="text-[28px] font-normal leading-[normal] text-[#141f27]">
               {member.name}
             </h1>
             {member.role && (
-              <p className="text-[18px] leading-[normal]">{member.role}</p>
+              <p className="text-[18px] font-normal leading-[normal] text-[#141f27]">
+                {member.role}
+              </p>
             )}
           </div>
         </div>
       </section>
 
+      {/* Content: p-20, gap-24 between sections */}
       <section className="flex-1 p-[20px] flex flex-col gap-[24px]">
+        {/* "About Me" heading: FH Oscar Light 24px #dcff46, py-8 */}
         <div className="py-[8px]">
-          <h2 className="text-[#dcff46] text-[24px] font-light leading-[normal]">
+          <h2 className="text-[24px] font-light leading-[normal] text-[#dcff46]">
             About Me
           </h2>
         </div>
 
+        {/* At IDEO since: label 18px #7993a4, content 16px white, gap-8 */}
         {member.joinedAt && (
           <div className="flex flex-col gap-[8px]">
-            <p className="text-[18px] text-[#7993a4] leading-[normal]">
+            <p className="text-[18px] font-normal leading-[normal] text-[#7993a4]">
               At IDEO since
             </p>
-            <p className="text-[16px] text-white leading-[normal]">
+            <p className="text-[16px] font-normal leading-[normal] text-white">
               {member.joinedAt}
             </p>
           </div>
         )}
 
+        {/* My focus at IDEO */}
         {focus.length > 0 && (
           <div className="flex flex-col gap-[8px]">
-            <p className="text-[18px] text-[#7993a4] leading-none">
+            <p className="text-[18px] font-normal leading-none text-[#7993a4]">
               My focus at IDEO
             </p>
-            <ul className="flex flex-col gap-[4px]">
-              {focus.map((item, i) => (
-                <li key={i} className="flex items-center gap-[8px]">
-                  <span className="w-[2.5px] h-[18px] bg-white rounded-full shrink-0" />
-                  <span className="text-[16px] text-white leading-[normal]">
-                    {item}
-                  </span>
-                </li>
-              ))}
-            </ul>
+            <BulletList items={focus} />
           </div>
         )}
 
+        {/* What you won't learn from my bio */}
         {facts.length > 0 && (
           <div className="flex flex-col gap-[8px]">
-            <p className="text-[18px] text-[#7993a4] leading-none">
+            <p className="text-[18px] font-normal leading-none text-[#7993a4]">
               What you won&apos;t learn from my bio
             </p>
-            <ul className="flex flex-col gap-[4px]">
-              {facts.map((item, i) => (
-                <li key={i} className="flex items-center gap-[8px]">
-                  <span className="w-[2.5px] h-[18px] bg-white rounded-full shrink-0" />
-                  <span className="text-[16px] text-white leading-[normal]">
-                    {item}
-                  </span>
-                </li>
-              ))}
-            </ul>
+            <BulletList items={facts} />
           </div>
         )}
 
+        {/* Let's chat + email */}
         {member.email && (
           <div className="flex flex-col gap-[8px]">
-            <p className="text-[18px] text-[#7993a4] leading-none">
+            <p className="text-[18px] font-normal leading-none text-[#7993a4]">
               Let&apos;s chat
             </p>
             <a
               href={`mailto:${member.email}`}
-              className="text-white text-[16px] underline leading-[normal] break-all"
+              className="text-[16px] font-normal leading-[normal] text-white underline decoration-solid break-all"
             >
               {member.email}
             </a>
@@ -140,6 +132,7 @@ export default async function MemberPage({ params }: Props) {
         )}
       </section>
 
+      {/* LinkedIn button: pt-40 pb-64 px-20 */}
       {member.linkedin && (
         <div className="px-[20px] pt-[40px] pb-[64px]">
           <a
@@ -149,13 +142,32 @@ export default async function MemberPage({ params }: Props) {
             className="flex items-center justify-center gap-[8px] w-full h-[48px] rounded-[8px] bg-white border border-[#d0d5dd] shadow-[0px_1px_2px_0px_rgba(16,24,40,0.05)]"
           >
             <LinkedinIcon />
-            <span className="text-[14px] font-semibold text-[#344054] leading-[20px]">
+            <span className="text-[14px] font-semibold leading-[20px] text-[#344054]" style={{ fontFamily: "Inter, sans-serif" }}>
               Connect on Linkedin
             </span>
           </a>
         </div>
       )}
     </main>
+  );
+}
+
+/** Bullet list matching Figma: 2.5px circle dot, 7.6px gap to text, ~3.8px between items */
+function BulletList({ items }: { items: string[] }) {
+  return (
+    <ul className="flex flex-col gap-[3.8px]">
+      {items.map((item, i) => (
+        <li key={i} className="flex items-center gap-[7.6px]">
+          <span
+            className="shrink-0 rounded-full bg-white"
+            style={{ width: "2.5px", height: "2.5px" }}
+          />
+          <span className="text-[16px] font-normal leading-[normal] text-white">
+            {item}
+          </span>
+        </li>
+      ))}
+    </ul>
   );
 }
 
