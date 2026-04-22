@@ -21,7 +21,11 @@ const BLOB_PATH = "data/team.json";
 async function readData(): Promise<TeamFile> {
   try {
     const meta = await head(BLOB_PATH);
-    const res = await fetch(meta.url, { cache: "no-store" });
+    const bustCache = `${meta.url}${meta.url.includes("?") ? "&" : "?"}t=${Date.now()}`;
+    const res = await fetch(bustCache, {
+      cache: "no-store",
+      next: { revalidate: 0 },
+    });
     const parsed = (await res.json()) as TeamFile;
     if (!parsed.members) return { members: [] };
     return parsed;
