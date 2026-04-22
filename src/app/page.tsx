@@ -31,12 +31,6 @@ export default async function HomePage() {
             <p className="text-sm text-[color:var(--slate-2)]">
               No team members yet.
             </p>
-            <Link
-              href="/admin"
-              className="mt-4 inline-block rounded-full bg-[color:var(--lime)] px-5 py-2 text-sm font-medium text-[color:var(--ink)]"
-            >
-              Add your first member
-            </Link>
           </div>
         ) : (
           <ul className="flex flex-col">
@@ -79,16 +73,10 @@ export default async function HomePage() {
         )}
       </section>
 
-      <nav className="sticky bottom-0 left-0 right-0 border-t border-white/10 bg-[color:var(--ink)]/90 backdrop-blur px-6 py-3 flex items-center justify-between">
+      <nav className="sticky bottom-0 left-0 right-0 border-t border-white/10 bg-[color:var(--ink)]/90 backdrop-blur px-6 py-3 flex items-center justify-center">
         <span className="text-xs text-[color:var(--slate-2)]">
           {members.length} {members.length === 1 ? "member" : "members"}
         </span>
-        <Link
-          href="/admin"
-          className="rounded-full bg-[color:var(--slate)] px-4 py-2 text-xs font-medium text-[color:var(--lime)]"
-        >
-          Admin
-        </Link>
       </nav>
     </main>
   );
