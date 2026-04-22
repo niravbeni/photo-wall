@@ -60,14 +60,14 @@ export default async function MemberPage({ params }: Props) {
           </div>
         </div>
 
-        {/* Name bar: height 92, bg #d9ff00, px-20 py-12 */}
-        <div className="bg-[#d9ff00] px-[20px] py-[12px]">
-          <div className="flex flex-col gap-[12px] py-[12px]">
-            <h1 className="text-[28px] font-normal leading-[normal] text-[#141f27]">
+        {/* Name bar: Figma total height 92, inner frame 68 @ py-12 + gap-12 */}
+        <div className="bg-[#d9ff00] overflow-hidden px-[20px] py-[12px]">
+          <div className="flex flex-col gap-[12px] h-[68px] justify-center">
+            <h1 className="text-[28px] font-normal leading-none text-[#141f27]">
               {member.name}
             </h1>
             {member.role && (
-              <p className="text-[18px] font-normal leading-[normal] text-[#141f27]">
+              <p className="text-[18px] font-normal leading-none text-[#141f27]">
                 {member.role}
               </p>
             )}
