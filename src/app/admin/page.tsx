@@ -74,6 +74,7 @@ export default function AdminPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [showList, setShowList] = useState(true);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const isNew = editingSlug === null;
@@ -102,6 +103,7 @@ export default function AdminPage() {
     setDraft(emptyDraft);
     setError(null);
     setSuccess(null);
+    setShowList(false);
   };
 
   const startEdit = (m: TeamMember) => {
@@ -109,6 +111,7 @@ export default function AdminPage() {
     setDraft(toDraft(m));
     setError(null);
     setSuccess(null);
+    setShowList(false);
   };
 
   const onSubmit = async (e: React.FormEvent) => {
@@ -229,42 +232,52 @@ export default function AdminPage() {
       </section>
 
       <section className="px-4 mt-4">
-        <div className="px-2 mb-2">
+        <div className="px-2 mb-2 flex items-center justify-between">
           <h2 className="text-[11px] uppercase tracking-[0.22em] text-[color:var(--slate-2)]">
             Members {loading ? "" : `(${members.length})`}
           </h2>
+          {members.length > 0 && (
+            <button
+              onClick={() => setShowList((v) => !v)}
+              className="text-[11px] text-[color:var(--lime)] font-medium"
+            >
+              {showList ? "Hide" : "Show"}
+            </button>
+          )}
         </div>
-        <ul className="flex flex-col gap-1">
-          {members.map((m) => {
-            const active = editingSlug === m.slug;
-            return (
-              <li key={m.slug}>
-                <button
-                  onClick={() => startEdit(m)}
-                  className={`w-full text-left flex items-center gap-3 rounded-2xl px-3 py-2.5 transition ${
-                    active
-                      ? "bg-[color:var(--lime)] text-[color:var(--ink)]"
-                      : "hover:bg-white/5"
-                  }`}
-                >
-                  <Avatar name={m.name} photo={m.photo} size="sm" />
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium">{m.name}</p>
-                    <p
-                      className={`truncate text-xs ${
-                        active
-                          ? "opacity-75"
-                          : "text-[color:var(--slate-2)]"
-                      }`}
-                    >
-                      {m.role || m.slug}
-                    </p>
-                  </div>
-                </button>
-              </li>
-            );
-          })}
-        </ul>
+        {showList && (
+          <ul className="flex flex-col gap-1">
+            {members.map((m) => {
+              const active = editingSlug === m.slug;
+              return (
+                <li key={m.slug}>
+                  <button
+                    onClick={() => startEdit(m)}
+                    className={`w-full text-left flex items-center gap-3 rounded-2xl px-3 py-2.5 transition ${
+                      active
+                        ? "bg-[color:var(--lime)] text-[color:var(--ink)]"
+                        : "hover:bg-white/5"
+                    }`}
+                  >
+                    <Avatar name={m.name} photo={m.photo} size="sm" />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium">{m.name}</p>
+                      <p
+                        className={`truncate text-xs ${
+                          active
+                            ? "opacity-75"
+                            : "text-[color:var(--slate-2)]"
+                        }`}
+                      >
+                        {m.role || m.slug}
+                      </p>
+                    </div>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        )}
       </section>
 
       <section className="px-6 mt-8">
