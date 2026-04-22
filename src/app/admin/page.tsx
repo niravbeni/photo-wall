@@ -422,14 +422,34 @@ export default function AdminPage() {
               placeholder="name@ideo.com"
             />
           </Field>
-          <Field label="LinkedIn URL">
-            <input
-              className="input"
-              value={draft.linkedin}
-              onChange={(e) => update("linkedin", e.target.value)}
-              placeholder="https://www.linkedin.com/in/username"
-            />
-          </Field>
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-medium text-[color:var(--slate-2)]">
+              Show LinkedIn button
+            </span>
+            <button
+              type="button"
+              onClick={() => update("linkedin", draft.linkedin ? "" : "https://www.linkedin.com/in/")}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition ${
+                draft.linkedin ? "bg-[color:var(--lime)]" : "bg-white/15"
+              }`}
+            >
+              <span
+                className={`inline-block h-4 w-4 rounded-full bg-white transition-transform ${
+                  draft.linkedin ? "translate-x-6" : "translate-x-1"
+                }`}
+              />
+            </button>
+          </div>
+          {draft.linkedin && (
+            <Field label="LinkedIn URL">
+              <input
+                className="input"
+                value={draft.linkedin}
+                onChange={(e) => update("linkedin", e.target.value)}
+                placeholder="https://www.linkedin.com/in/username"
+              />
+            </Field>
+          )}
 
           {error && (
             <p className="text-sm text-red-200 bg-red-500/15 border border-red-500/30 rounded-xl px-3 py-2">
