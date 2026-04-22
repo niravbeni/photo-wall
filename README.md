@@ -1,6 +1,6 @@
 # Photo Wall
 
-A team photo wall built with Next.js 16, React 19, and Tailwind CSS 4. Data and images are stored in Vercel Blob (free tier, zero external accounts).
+A team photo wall built with Next.js 16, React 19, and Tailwind CSS 4. Data and images are stored in Vercel Blob (free tier).
 
 ## Features
 
@@ -19,49 +19,49 @@ cd photo-wall
 npm install
 ```
 
-### 2. Deploy to Vercel
+### 2. Create a Vercel Blob store
 
-1. Go to [vercel.com](https://vercel.com) and import the `photo-wall` repository
-2. Vercel automatically provisions a Blob store when you add the integration -- go to your project's **Storage** tab and click **Create Database** → **Blob**
-3. Vercel injects the `BLOB_READ_WRITE_TOKEN` env var automatically
-4. Deploy
+1. Go to [vercel.com](https://vercel.com) and import this repo as a project
+2. In the project dashboard, go to **Storage** → **Create** → **Blob**
+3. Connect the Blob store to your project — this automatically adds the `BLOB_READ_WRITE_TOKEN` env var
 
-### 3. Run locally (optional)
+### 3. Run locally
 
-Copy the `BLOB_READ_WRITE_TOKEN` from your Vercel project settings into a local `.env.local`:
+For local development, copy the token from your Vercel project settings:
 
 ```bash
 cp .env.example .env.local
-# edit .env.local with the token from Vercel → Project → Settings → Environment Variables
 ```
+
+Edit `.env.local` with your `BLOB_READ_WRITE_TOKEN` (found in Vercel → Project → Storage → Blob → Settings).
 
 ```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+Open [http://localhost:3000](http://localhost:3000). Use the **Admin** panel to add team members.
 
-## How Data Storage Works
+## Deploy to Vercel
 
-All data lives in **Vercel Blob** (included free with Vercel Hobby plan):
+If you already connected the Blob store (step 2 above), just push to `main` — Vercel auto-deploys. The `BLOB_READ_WRITE_TOKEN` is injected automatically, no manual env var setup needed.
 
-| What | How |
+## How Data is Stored
+
+All member data lives in a single `data/team.json` blob in Vercel Blob. Images are uploaded as individual blobs under `members/`. There is no database — just flat files in Vercel's CDN-backed object store.
+
+| Blob path | Contents |
 |---|---|
-| Member data (name, role, bio, etc.) | Single JSON blob (`team-data.json`) |
-| Member photos | Individual image blobs (`members/name-xxxx.jpg`) |
+| `data/team.json` | JSON array of all team members |
+| `members/{slug}-{hash}.{ext}` | Individual member photos |
 
-The admin panel at `/admin` reads and writes these blobs via API routes. No database or external service needed.
-
-## Data Model
-
-Each team member has:
+### Data model per member
 
 | Field | Type | Description |
 |---|---|---|
-| `slug` | text (PK) | URL-safe identifier, auto-generated from name |
+| `slug` | text | URL-safe identifier, auto-generated from name |
 | `name` | text | Full name (required) |
 | `role` | text | Job title |
-| `photo` | text | URL to photo (Vercel Blob) |
+| `photo` | text | URL to photo in Vercel Blob |
 | `joinedAt` | text | When they joined (e.g. "December, 2021") |
 | `focusAreas` | string[] | Bullet points for "My focus" section |
 | `personalFacts` | string[] | Bullet points for "What you won't learn from my bio" |
@@ -72,5 +72,5 @@ Each team member has:
 
 - **Framework**: Next.js 16 (App Router)
 - **UI**: React 19 + Tailwind CSS 4
-- **Storage**: Vercel Blob (free tier -- data + images)
+- **Storage**: Vercel Blob (free tier — data + images)
 - **Hosting**: Vercel (free tier)

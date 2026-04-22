@@ -1,4 +1,4 @@
-import { put, list } from "@vercel/blob";
+import { put, head } from "@vercel/blob";
 
 export type TeamMember = {
   slug: string;
@@ -16,31 +16,26 @@ type TeamFile = {
   members: TeamMember[];
 };
 
-const DATA_BLOB_NAME = "team-data.json";
-
-async function findDataBlobUrl(): Promise<string | null> {
-  const { blobs } = await list({ prefix: DATA_BLOB_NAME });
-  return blobs.length > 0 ? blobs[0].url : null;
-}
+const BLOB_PATH = "data/team.json";
 
 async function readData(): Promise<TeamFile> {
   try {
-    const url = await findDataBlobUrl();
-    if (!url) return { members: [] };
-    const res = await fetch(url, { cache: "no-store" });
-    if (!res.ok) return { members: [] };
+    const meta = await head(BLOB_PATH);
+    const res = await fetch(meta.url, { cache: "no-store" });
     const parsed = (await res.json()) as TeamFile;
-    return parsed.members ? parsed : { members: [] };
+    if (!parsed.members) return { members: [] };
+    return parsed;
   } catch {
     return { members: [] };
   }
 }
 
 async function writeData(data: TeamFile): Promise<void> {
-  await put(DATA_BLOB_NAME, JSON.stringify(data, null, 2), {
+  await put(BLOB_PATH, JSON.stringify(data, null, 2), {
     access: "public",
-    contentType: "application/json",
     addRandomSuffix: false,
+    allowOverwrite: true,
+    contentType: "application/json",
   });
 }
 

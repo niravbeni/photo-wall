@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { put } from "@vercel/blob";
 import crypto from "crypto";
+import { put } from "@vercel/blob";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -61,6 +61,7 @@ export async function POST(req: Request) {
 
     const blob = await put(filename, file, {
       access: "public",
+      addRandomSuffix: false,
       contentType: file.type,
     });
 
