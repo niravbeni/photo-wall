@@ -1,11 +1,9 @@
 import { NextResponse } from "next/server";
+import { put } from "@vercel/blob";
 import crypto from "crypto";
-import { supabase } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
-
-const BUCKET = "member-photos";
 
 const ALLOWED = new Map<string, string>([
   ["image/jpeg", "jpg"],
@@ -59,29 +57,14 @@ export async function POST(req: Request) {
 
     const baseName = safeSlug(hint) || safeSlug(file.name) || "photo";
     const rand = crypto.randomBytes(4).toString("hex");
-    const filename = `${baseName}-${rand}.${ext}`;
+    const filename = `members/${baseName}-${rand}.${ext}`;
 
-    const bytes = new Uint8Array(await file.arrayBuffer());
+    const blob = await put(filename, file, {
+      access: "public",
+      contentType: file.type,
+    });
 
-    const { error: uploadError } = await supabase.storage
-      .from(BUCKET)
-      .upload(filename, bytes, {
-        contentType: file.type,
-        upsert: false,
-      });
-
-    if (uploadError) {
-      return NextResponse.json(
-        { error: uploadError.message },
-        { status: 500 },
-      );
-    }
-
-    const { data: urlData } = supabase.storage
-      .from(BUCKET)
-      .getPublicUrl(filename);
-
-    return NextResponse.json({ url: urlData.publicUrl, filename });
+    return NextResponse.json({ url: blob.url, filename });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Upload failed";
     return NextResponse.json({ error: message }, { status: 500 });

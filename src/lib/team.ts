@@ -1,4 +1,4 @@
-import { supabase } from "./supabase";
+import { put, list } from "@vercel/blob";
 
 export type TeamMember = {
   slug: string;
@@ -12,68 +12,46 @@ export type TeamMember = {
   linkedin?: string;
 };
 
-type MemberRow = {
-  slug: string;
-  name: string;
-  role: string;
-  photo: string;
-  joined_at: string;
-  focus_areas: string[];
-  personal_facts: string[];
-  email: string;
-  linkedin: string;
+type TeamFile = {
+  members: TeamMember[];
 };
 
-function rowToMember(row: MemberRow): TeamMember {
-  return {
-    slug: row.slug,
-    name: row.name,
-    role: row.role,
-    photo: row.photo,
-    joinedAt: row.joined_at,
-    focusAreas: row.focus_areas,
-    personalFacts: row.personal_facts,
-    email: row.email,
-    linkedin: row.linkedin,
-  };
+const DATA_BLOB_NAME = "team-data.json";
+
+async function findDataBlobUrl(): Promise<string | null> {
+  const { blobs } = await list({ prefix: DATA_BLOB_NAME });
+  return blobs.length > 0 ? blobs[0].url : null;
 }
 
-function memberToRow(m: TeamMember): MemberRow {
-  return {
-    slug: m.slug,
-    name: m.name,
-    role: m.role ?? "",
-    photo: m.photo ?? "",
-    joined_at: m.joinedAt ?? "",
-    focus_areas: (m.focusAreas ?? []).filter(Boolean),
-    personal_facts: (m.personalFacts ?? []).filter(Boolean),
-    email: m.email ?? "",
-    linkedin: m.linkedin ?? "",
-  };
+async function readData(): Promise<TeamFile> {
+  try {
+    const url = await findDataBlobUrl();
+    if (!url) return { members: [] };
+    const res = await fetch(url, { cache: "no-store" });
+    if (!res.ok) return { members: [] };
+    const parsed = (await res.json()) as TeamFile;
+    return parsed.members ? parsed : { members: [] };
+  } catch {
+    return { members: [] };
+  }
+}
+
+async function writeData(data: TeamFile): Promise<void> {
+  await put(DATA_BLOB_NAME, JSON.stringify(data, null, 2), {
+    access: "public",
+    contentType: "application/json",
+    addRandomSuffix: false,
+  });
 }
 
 export async function listMembers(): Promise<TeamMember[]> {
-  const { data, error } = await supabase
-    .from("members")
-    .select("*")
-    .order("name");
-
-  if (error) throw new Error(error.message);
-  return (data as MemberRow[]).map(rowToMember);
+  const data = await readData();
+  return data.members.sort((a, b) => a.name.localeCompare(b.name));
 }
 
 export async function getMember(slug: string): Promise<TeamMember | null> {
-  const { data, error } = await supabase
-    .from("members")
-    .select("*")
-    .eq("slug", slug)
-    .single();
-
-  if (error) {
-    if (error.code === "PGRST116") return null; // not found
-    throw new Error(error.message);
-  }
-  return rowToMember(data as MemberRow);
+  const data = await readData();
+  return data.members.find((m) => m.slug === slug) ?? null;
 }
 
 export function slugify(input: string): string {
@@ -108,41 +86,40 @@ export async function upsertMember(
   member: TeamMember,
   originalSlug?: string,
 ): Promise<TeamMember> {
+  const data = await readData();
   const normalized = normalizeMember(member);
 
   if (!normalized.slug) {
     throw new Error("A name or slug is required");
   }
 
-  if (originalSlug && originalSlug !== normalized.slug) {
-    const { data: existing } = await supabase
-      .from("members")
-      .select("slug")
-      .eq("slug", normalized.slug)
-      .single();
+  const targetSlug = originalSlug ?? normalized.slug;
+  const existingIdx = data.members.findIndex((m) => m.slug === targetSlug);
 
-    if (existing) {
+  if (existingIdx === -1) {
+    if (data.members.some((m) => m.slug === normalized.slug)) {
       throw new Error(`A member with slug "${normalized.slug}" already exists`);
     }
-
-    await supabase.from("members").delete().eq("slug", originalSlug);
+    data.members.push(normalized);
+  } else {
+    if (
+      normalized.slug !== targetSlug &&
+      data.members.some((m) => m.slug === normalized.slug)
+    ) {
+      throw new Error(`A member with slug "${normalized.slug}" already exists`);
+    }
+    data.members[existingIdx] = normalized;
   }
 
-  const row = memberToRow(normalized);
-  const { error } = await supabase
-    .from("members")
-    .upsert(row, { onConflict: "slug" });
-
-  if (error) throw new Error(error.message);
+  await writeData(data);
   return normalized;
 }
 
 export async function deleteMember(slug: string): Promise<boolean> {
-  const { error, count } = await supabase
-    .from("members")
-    .delete({ count: "exact" })
-    .eq("slug", slug);
-
-  if (error) throw new Error(error.message);
-  return (count ?? 0) > 0;
+  const data = await readData();
+  const before = data.members.length;
+  data.members = data.members.filter((m) => m.slug !== slug);
+  if (data.members.length === before) return false;
+  await writeData(data);
+  return true;
 }
