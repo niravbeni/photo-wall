@@ -71,16 +71,23 @@
     Roboto, Helvetica, Arial, sans-serif;
 }
 
-html,
-body {
-  background: var(--background);
+html {
+  background: #ffffff;
   color: var(--foreground);
 }
 
 body {
+  background: var(--ink);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+}
+
+@media (min-width: 640px) {
+  html,
+  body {
+    background: var(--page);
+  }
 }
 
 * {
